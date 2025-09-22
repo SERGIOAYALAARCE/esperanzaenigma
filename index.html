@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Puzzle Interactivo</title>
+    <style>
+        /* Estilos generales */
+        body {
+            background-color: #0f172a;
+            color: #e2e8f0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 1rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+        
+        /* Estilos para elementos con efecto neón */
+        .neon-border {
+            border: 1px solid rgba(94, 200, 255, 0.4);
+            box-shadow: 0 0 10px rgba(94, 200, 255, 0.5), inset 0 0 10px rgba(94, 200, 255, 0.2);
+        }
+        
+        .glow-cyan {
+            animation: cyan-pulse 3s infinite alternate;
+        }
+        
+        @keyframes cyan-pulse {
+            from {
+                box-shadow: 0 0 10px rgba(94, 200, 255, 0.5), inset 0 0 10px rgba(94, 200, 255, 0.2);
+            }
+            to {
+                box-shadow: 0 0 20px rgba(94, 200, 255, 0.8), inset 0 0 15px rgba(94, 200, 255, 0.3);
+            }
+        }
+        
+        .btn-glow:hover {
+            box-shadow: 0 0 15px rgba(94, 200, 255, 0.7);
+        }
+        
+        /* Estilos para el anillo de progreso */
+        .ring-track {
+            stroke: rgba(94, 200, 255, 0.2);
+        }
+        
+        .ring-progress {
+            stroke: rgba(94, 200, 255, 0.9);
+            stroke-dasharray: 326.7;
+            stroke-dashoffset: 326.7;
+            transition: stroke-dashoffset 0.5s ease;
+        }
+        
+        /* Estilos para la burbuja de hint */
+        .hint-bubble {
+            background: rgba(30, 58, 138, 0.3);
+            border: 1px solid rgba(94, 200, 255, 0.3);
+        }
+        
+        /* Estilos para las opciones de misión */
+        .mission-option {
+            background: rgba(30, 58, 138, 0.2);
+            border: 1px solid rgba(94, 200, 255, 0.3);
+            color: #e2e8f0;
+            padding: 0.4rem 0.6rem;
+            border-radius: 0.375rem;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin: 0.15rem;
+        }
+        
+        .mission-option:hover {
+            background: rgba(94, 200, 255, 0.2);
+        }
+        
+        .mission-option.correct {
+            background: rgba(52, 211, 153, 0.2);
+            border-color: rgba(52, 211, 153, 0.5);
+        }
+        
+        .mission-option.incorrect {
+            background: rgba(248, 113, 113, 0.2);
+            border-color: rgba(248, 113, 113, 0.5);
+        }
+        
+        /* Estilos para el input */
+        .hud-input {
+            background: rgba(15, 23, 42, 0.7);
+            border: 1px solid rgba(94, 200, 255, 0.4);
+            outline: none;
+            color: #e2e8f0;
+        }
+        
+        .hud-input:focus {
+            box-shadow: 0 0 10px rgba(94, 200, 255, 0.5);
+        }
+        
+        /* Estilos para el ramo */
+        .bouquet-hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        .bouquet-wrap {
+            transition: opacity 1s ease;
+        }
+        
+        .sway {
+            animation: sway 8s infinite alternate ease-in-out;
+            transform-origin: center bottom;
+        }
+        
+        @keyframes sway {
+            0% { transform: rotate(-2deg); }
+            100% { transform: rotate(2deg); }
+        }
+        
+        /* Efecto de escaneo */
+        .scan-highlight {
+            animation: scan-pulse 2s infinite;
+            background-color: rgba(156, 39, 176, 0.3);
+            border-radius: 2px;
+            padding: 0 2px;
+        }
+        
+        @keyframes scan-pulse {
+            0%, 100% { background-color: rgba(156, 39, 176, 0.1); }
+            50% { background-color: rgba(156, 39, 176, 0.5); }
+        }
+        
+        /* Fuente Orbitron */
+        .font-orbitron {
+            font-family: 'Orbitron', sans-serif;
+        }
+        
+        /* Utilidades */
+        .rounded-2xl { border-radius: 1rem; }
+        .rounded-xl { border-radius: 0.75rem; }
+        .rounded-lg { border-radius: 0.5rem; }
+        
+        .hidden { display: none; }
+        .flex { display: flex; }
+        .inline-flex { display: inline-flex; }
+        
+        /* Grid */
+        .grid { display: grid; }
+        .gap-2 { gap: 0.5rem; }
+        .gap-3 { gap: 0.75rem; }
+        .gap-4 { gap: 1rem; }
+        .gap-6 { gap: 1.5rem; }
+        
+        /* Espaciado */
+        .p-4 { padding: 1rem; }
+        .p-5 { padding: 1.25rem; }
+        .p-6 { padding: 1.5rem; }
+        .p-7 { padding: 1.75rem; }
+        .p-8 { padding: 2rem; }
+        
+        .px-4 { padding-left: 1rem; padding-right: 1rem; }
+        .py-2 { padding-top: 0.5rem; padding-bottom: 0.5rem; }
+        .py-3 { padding-top: 0.75rem; padding-bottom: 0.75rem; }
+        
+        .mb-1 { margin-bottom: 0.25rem; }
+        .mb-2 { margin-bottom: 0.5rem; }
+        .mb-3 { margin-bottom: 0.75rem; }
+        .mb-4 { margin-bottom: 1rem; }
+        
+        .mt-3 { margin-top: 0.75rem; }
+        .mt-4 { margin-top: 1rem; }
+        .mt-8 { margin-top: 2rem; }
+        .mt-10 { margin-top: 2.5rem; }
+        .mt-14 { margin-top: 3.5rem; }
+        
+        /* Tamaños de texto */
+        .text-xs { font-size: 0.75rem; }
+        .text-sm { font-size: 0.875rem; }
+        .text-lg { font-size: 1.125rem; }
+        .text-xl { font-size: 1.25rem; }
+        
+        /* Colores de texto */
+        .text-sky-100 { color: rgba(225, 240, 255, 0.9); }
+        .text-sky-200 { color: rgba(186, 220, 255, 0.9); }
+        .text-cyan-200 { color: rgba(153, 230, 255, 0.9); }
+        .text-cyan-300 { color: rgba(103, 220, 255, 0.9); }
+        .text-purple-200 { color: rgba(210, 190, 255, 0.9); }
+        .text-emerald-200 { color: rgba(164, 255, 210, 0.9); }
+        
+        /* Responsive */
+        @media (min-width: 768px) {
+            .md\:grid-cols-\[140px_1fr\] {
+                grid-template-columns: 140px 1fr;
+            }
+            .md\:grid-cols-3 {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            .md\:p-7 {
+                padding: 1.75rem;
+            }
+            .md\:p-8 {
+                padding: 2rem;
+            }
+        }
+        
+        /* Mejoras visuales adicionales */
+        .mission-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.3rem;
+        }
+        
+        .mission-box {
+            flex: 1;
+            min-width: 300px;
+        }
+        
+        #hintsPanel {
+            max-height: 150px;
+            overflow-y: auto;
+            padding: 0.5rem;
+            background: rgba(15, 23, 42, 0.5);
+            border-radius: 0.5rem;
+            border: 1px solid rgba(94, 200, 255, 0.2);
+        }
+        
+        .hint-item {
+            padding: 0.3rem 0.5rem;
+            border-left: 2px solid rgba(94, 200, 255, 0.5);
+            margin-bottom: 0.3rem;
+            font-size: 0.85rem;
+        }
+        
+        .petal {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: radial-gradient(circle, #FFD84D 0%, #FFB300 100%);
+            border-radius: 50% 50% 50% 0;
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        @keyframes fall {
+            0% {
+                opacity: 1;
+                transform: translate(0, 0) rotate(0deg);
+            }
+            100% {
+                opacity: 0;
+                transform: translate(var(--tx), var(--ty)) rotate(360deg);
+            }
+        }
+        
+        #scanBtn {
+          background: #2563eb !important; /* azul */
+          color: #fff !important;
+          border-color: #2563eb !important;
+        }
+        #hintBtn {
+          background: #a21caf !important; /* morado */
+          color: #fff !important;
+          border-color: #a21caf !important;
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+<!-- Puzzle + Status -->
+<section class="neon-border rounded-2xl p-5 md:p-7 glow-cyan">
+  <div class="grid md:grid-cols-[140px_1fr] gap-6 items-center">
+    <!-- Progress Ring -->
+    <div class="flex items-center justify-center">
+      <svg id="ring" width="120" height="120" viewBox="0 0 120 120" role="img" aria-label="Progreso del enigma">
+        <defs>
+          <filter id="softGlow">
+            <feGaussianBlur stdDeviation="1.2" result="blur"/>
+            <feMerge>
+              <feMergeNode in="blur"/>
+              <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+          </filter>
+        </defs>
+        <circle class="ring-track" cx="60" cy="60" r="52" stroke-width="8" fill="none" />
+        <g transform="rotate(-90 60 60)">
+          <circle id="ringProgress" class="ring-progress" cx="60" cy="60" r="52" stroke-width="8" fill="none" stroke-linecap="round" />
+        </g>
+        <!-- Pips -->
+        <g id="pips"></g>
+        <text id="ringText" x="60" y="64" text-anchor="middle" class="font-orbitron" font-size="18" fill="rgba(94,200,255,.9)" filter="url(#softGlow)">0%</text>
+      </svg>
+    </div>
+
+    <!-- Riddle + Input -->
+    <div>
+      <div class="flex items-center justify-between gap-4 mb-3">
+        <h2 class="font-orbitron text-lg md:text-xl text-sky-200 tracking-wide">
+          Desafío interactivo — Probando conocimientos web
+        </h2>
+        <div class="text-[10px] uppercase tracking-widest text-cyan-300/80">
+          Código: 6 letras
+        </div>
+      </div>
+
+      <div class="hint-bubble rounded-xl p-4 mb-4">
+        <p class="text-sky-100/90 leading-relaxed">
+          Completa misiones web. Cada acierto puede revelar UNA letra al azar. Los retos de castigo también sueltan una letra.
+          Máximo 4 letras se revelan en total, el resto deberás deducirlo. Activa el escáner para resaltar letras faltantes en el texto.
+        </p>
+      </div>
+
+      <!-- Misiones de código con romance -->
+      <div id="missions" class="grid gap-3 md:grid-cols-3 mb-4 mission-container">
+        <!-- Misión 1 -->
+        <div class="neon-border rounded-xl p-4 mission-box">
+          <div class="text-[10px] uppercase tracking-widest text-cyan-300/80 mb-1">Misión 1 — Semántica HTML</div>
+          <div class="text-sky-100/90 text-sm mb-2">Elige la opción más accesible <span class='scan-target'>y</span> semántica para un <span class='scan-target'>disparador</span> de acción en la página:</div>
+          <div class="mission-options" id="opts-m1">
+            <button class="mission-option" data-mission="m1" data-correct="true">&lt;button type="button"&gt;</button>
+            <button class="mission-option" data-mission="m1">&lt;a role="button" href="#"&gt;</button>
+            <button class="mission-option" data-mission="m1">&lt;div onclick="..."&gt;</button>
+            <button class="mission-option" data-mission="m1">&lt;input type="submit"&gt;</button>
+            <button class="mission-option" data-mission="m1">&lt;span tabindex="0"&gt;</button>
+          </div>
+        </div>
+
+        <!-- Misión 2 -->
+        <div class="neon-border rounded-xl p-4 mission-box">
+          <div class="text-[10px] uppercase tracking-widest text-cyan-300/80 mb-1">Misión 2 — Arrays y Bucles</div>
+          <div class="text-sky-100/90 text-sm mb-2">Dada const <span class='scan-target'>recuerdos</span> = ["risa","café","paseo"]; elige la forma más idiomática de crear un nuev<span class='scan-target'>o</span> arra<span class='scan-target'>y</span> con "❤️" al final de cada ítem:</div>
+          <div class="mission-options" id="opts-m2">
+            <button class="mission-option" data-mission="m2">for(let i=0;i&lt;recuerdos.length;i++){ lista.push(recuerdos[i]+"❤️"); }</button>
+            <button class="mission-option" data-mission="m2" data-correct="true">recuerdos.map(x =&gt; x+"❤️")</button>
+            <button class="mission-option" data-mission="m2">recuerdos.forEach(x =&gt; x+"❤️")</button>
+            <button class="mission-option" data-mission="m2">while(recuerdos){ /*...*/ }</button>
+            <button class="mission-option" data-mission="m2">for(const x in recuerdos){ /*...*/ }</button>
+          </div>
+        </div>
+
+        <!-- Misión 3 -->
+        <div class="neon-border rounded-xl p-4 mission-box">
+          <div class="text-[10px] uppercase tracking-widest text-cyan-300/80 mb-1">Misión 3 — Eventos + Sintaxis</div>
+          <div class="text-sky-100/90 text-sm mb-2">En un formulari<span class='scan-target'>o</span> que no debe <span class='scan-target'>recargar</span> la página, ¿cuál combinaci<span class='scan-target'>ó</span>n describe me<span class='scan-target'>jor</span> la intenci<span class='scan-target'>ó</span>n<span class='scan-target'> y</span> ayuda a quedarnos junt<span class='scan-target'>os</span>?</div>
+          <div class="mission-options" id="opts-m3">
+            <button class="mission-option" data-mission="m3" data-correct="true">e.preventDefault(); mostrarMensaje("Te elijo, Esperanza")</button>
+            <button class="mission-option" data-mission="m3">return false; alert('ok')</button>
+            <button class="mission-option" data-mission="m3">form.submit()</button>
+            <button class="mission-option" data-mission="m3">location.href = "/gracias"</button>
+            <button class="mission-option" data-mission="m3">throw new Error()</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Misión de castigo (aparece solo si fallas una misión) -->
+      <div id="castigo" class="neon-border rounded-xl p-4 mission-box mt-3 hidden">
+        <div class="text-[10px] uppercase tracking-widest text-cyan-300/80 mb-1">Misión de castigo — ¡Recupera tu oportunidad!</div>
+        <div class="text-sky-100/90 text-sm mb-2" id="castigo-pregunta"></div>
+        <div class="mission-options" id="opts-castigo"></div>
+      </div>
+
+      <form id="form" class="grid sm:grid-cols-[1fr_auto] gap-3" autocomplete="off">
+        <div class="relative">
+          <input id="answer" type="text" inputmode="text" autocapitalize="none" spellcheck="false"
+                 placeholder="Escribe la palabra secreta…" 
+                 class="hud-input w-full text-sky-100 placeholder-sky-300/50 px-4 py-3 rounded-lg" />
+          <div id="liveHint" class="absolute -bottom-5 left-1 text-[11px] text-cyan-200/70"></div>
+        </div>
+        <button id="unlockBtn" class="btn-glow px-5 py-3 rounded-lg bg-cyan-400/20 text-cyan-200 border border-cyan-300/40 hover:bg-cyan-400/30 transition">
+          Desbloquear
+        </button>
+      </form>
+
+      <div class="mt-4 flex flex-wrap items-center gap-2">
+        <button id="hintBtn" class="px-4 py-2 text-xs rounded-lg bg-sky-300/10 text-sky-200 border border-sky-300/40 hover:bg-sky-300/20 transition btn-glow">
+          Dame una pista
+        </button>
+        <button id="scanBtn" class="px-4 py-2 text-xs rounded-lg bg-purple-400/10 text-purple-200 border border-purple-300/40 hover:bg-purple-400/20 transition btn-glow">
+          Activar escáner
+        </button>
+        <span class="text-[11px] text-cyan-200/70 ml-2">Consejo: sin acentos, una sola palabra.</span>
+      </div>
+
+      <!-- Hint stream -->
+      <div id="hintsPanel" class="mt-3 space-y-2"></div>
+
+      <!-- Feedback -->
+      <div id="feedback" class="mt-4 text-sm"></div>
+    </div>
+  </div>
+</section>
+
+<!-- Bouquet Section -->
+<section class="mt-10 md:mt-14">
+  <div class="neon-border rounded-2xl p-5 md:p-8">
+    <div class="flex items-center justify-between flex-wrap gap-4 mb-4">
+      <h3 class="font-orbitron text-sky-200 tracking-wide text-lg">Premio oculto</h3>
+      <div class="flex items-center gap-2 opacity-0 pointer-events-none transition" id="prizeActions"></div>
+    </div>
+
+    <div class="relative min-h-[260px] md:min-h-[360px] lg:min-h-[420px]">
+      <!-- Placeholder overlay before unlock -->
+      <div id="lockedOverlay" class="absolute inset-0 rounded-xl grid place-items-center border border-sky-300/20 text-sky-200/70 text-center p-6">
+        <div>
+          <div class="font-orbitron text-cyan-200 text-sm mb-2 tracking-widest">Estado: Bloqueado</div>
+          <div class="mx-auto" aria-label="Animación de signos de interrogación">
+            <svg width="260" height="80" viewBox="0 0 260 80" role="img" aria-label="Interrogantes animados" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <filter id="qGlow">
+                  <feGaussianBlur stdDeviation="2" result="b"/>
+                  <feMerge>
+                    <feMergeNode in="b"/>
+                    <feMergeNode in="SourceGraphic"/>
+                  </feMerge>
+                </filter>
+              </defs>
+              <g font-family="Orbitron, sans-serif" font-weight="700" font-size="36" text-anchor="middle">
+                <text x="30" y="50" fill="#5EC8FF" opacity="0.85" filter="url(#qGlow)">?
+                  <animate attributeName="y" values="50;44;50" dur="2.6s" repeatCount="indefinite" begin="0s"/>
+                  <animate attributeName="opacity" values="0.6;1;0.6" dur="2.6s" repeatCount="indefinite" begin="0s"/>
+                </text>
+                <text x="90" y="50" fill="#FFD84D" opacity="0.9" filter="url(#qGlow)">?
+                  <animate attributeName="y" values="50;42;50" dur="2.2s" repeatCount="indefinite" begin="0.2s"/>
+                  <animate attributeName="opacity" values="0.6;1;0.6" dur="2.2s" repeatCount="indefinite" begin="0.2s"/>
+                </text>
+                <text x="150" y="50" fill="#9B57FF" opacity="0.85" filter="url(#qGlow)">?
+                  <animate attributeName="y" values="50;43;50" dur="2.8s" repeatCount="indefinite" begin="0.4s"/>
+                  <animate attributeName="opacity" values="0.6;1;0.6" dur="2.8s" repeatCount="indefinite" begin="0.4s"/>
+                </text>
+                <text x="210" y="50" fill="#00FFD1" opacity="0.9" filter="url(#qGlow)">?
+                  <animate attributeName="y" values="50;44;50" dur="2.4s" repeatCount="indefinite" begin="0.6s"/>
+                  <animate attributeName="opacity" values="0.6;1;0.6" dur="2.4s" repeatCount="indefinite" begin="0.6s"/>
+                </text>
+              </g>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bouquet -->
+      <div id="bouquetWrap" class="absolute inset-0 flex items-end justify-center bouquet-wrap bouquet-hidden">
+        <svg id="bouquet" class="sway" width="100%" height="100%" viewBox="0 0 600 600" role="img" aria-label="Ramo de flores amarillas" preserveAspectRatio="xMidYMid meet">
+          <defs>
+            <radialGradient id="petal" cx="30%" cy="30%">
+              <stop offset="0%" stop-color="#FFF4B0"/>
+              <stop offset="55%" stop-color="#FFD84D"/>
+              <stop offset="100%" stop-color="#FFB300"/>
+            </radialGradient>
+            <radialGradient id="center" cx="40%" cy="40%">
+              <stop offset="0%" stop-color="#FFECB3"/>
+              <stop offset="50%" stop-color="#E08A00"/>
+              <stop offset="100%" stop-color="#8A4B00"/>
+            </radialGradient>
+            <linearGradient id="stem" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#39C172"/>
+              <stop offset="100%" stop-color="#1E8A4A"/>
+            </linearGradient>
+            <linearGradient id="wrap" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#254056"/>
+              <stop offset="100%" stop-color="#1B2E3D"/>
+            </linearGradient>
+            <filter id="bloomGlow">
+              <feGaussianBlur stdDeviation="2" result="b"/>
+              <feMerge>
+                <feMergeNode in="b"/>
+                <feMergeNode in="SourceGraphic"/>
+              </feMerge>
+            </filter>
+          </defs>
+
+          <!-- Wrapper paper -->
+          <g transform="translate(300,520)">
+            <path d="M -90 10 C -140 -40, -120 -140, -20 -160 C 10 -165, 30 -165, 60 -160 C 160 -140, 180 -40, 130 10 C 60 60, -20 60, -90 10 Z"
+                  fill="url(#wrap)" stroke="rgba(94,200,255,.25)" stroke-width="1"/>
+            <path d="M -60 25 C -100 0, -70 -60, -20 -70 C 30 -80, 80 -60, 100 0 C 65 35, 10 45, -60 25 Z"
+                  fill="rgba(255,255,255,.05)"/>
+          </g>
+
+          <!-- Stems -->
+          <g id="stems" transform="translate(300,520)" stroke="url(#stem)" stroke-width="6" stroke-linecap="round" fill="none">
+            <path d="M 0 0 C -10 -60, -40 -160, -80 -240" />
+            <path d="M 0 0 C 0 -80, 0 -190, 0 -270" />
+            <path d="M 0 0 C 10 -70, 40 -170, 85 -240" />
+            <path d="M 0 0 C -5 -70, -10 -180, -20 -260" />
+            <path d="M 0 0 C 8 -60, 25 -140, 45 -210" />
+          </g>
+
+          <!-- Leaves -->
+          <g id="leaves" transform="translate(300,520)" fill="#2DA864" opacity=".9">
+            <path d="M -15 -40 C -80 -60, -70 -90, -30 -95 C 10 -95, 20 -70, -15 -40 Z" />
+            <path d="M 18 -42 C 70 -65, 75 -100, 30 -104 C -10 -106, -15 -80, 18 -42 Z" />
+          </g>
+
+          <!-- Flowers -->
+          <g id="flowers" filter="url(#bloomGlow)">
+            <!-- Helper for drawing a flower -->
+            <!-- We'll place several flowers with slight variations -->
+            <g class="flower" transform="translate(180,300) rotate(-10)">
+              <g class="petals">
+                <!-- pétalos rodeando por completo -->
+                <g fill="url(#petal)">
+                  <ellipse cx="0" cy="-38" rx="18" ry="46" transform="rotate(0)" />
+                  <ellipse cx="0" cy="-38" rx="18" ry="46" transform="rotate(20)" />
+                  <ellipse cx="0" cy="-38" rx="18" ry="46" transform="rotate(40)" />
+                  <ellipse cx="0" cy="-38" rx="18" ry="46" transform="rotate(60)" />
+                  <ellipse cx="0" cy="-38" rx="18" ry="46" transform="rotate(80)" />
+                  <ellipse cx="0" cy="-38" rx="18" ry="46" transform="rotate(100)" />
+                  <ellipse cx="0" cy="-38" rx="18" ry="46" transform="rotate(120)" />
+                  <ellipse cx="0" cy="-38" rx="18" ry="46" transform="rotate(140)" />
+                  <ellipse cx="0" cy="-38" rx="18" ry="46" transform="rotate(160)" />
+                  <ellipse cx="0" cy="-38" rx="18" ry="46" transform="rotate(180)" />
+                  <ellipse cx="0" cy="-38" rx="18" ry="46" transform="rotate(200)" />
+                  <ellipse cx="0" cy="-38" rx="18" ry="46" transform="rotate(220)" />
+                  <ellipse cx="0" cy="-38" rx="18" ry="46" transform="rotate(240)" />
+                  <ellipse cx="0" cy="-38" rx="18" ry="46" transform="rotate(260)" />
+                  <ellipse cx="0" cy="-38" rx="18" ry="46" transform="rotate(280)" />
+                  <ellipse cx="0" cy="-38" rx="18" ry="46" transform="rotate(300)" />
+                  <ellipse cx="0" cy="-38" rx="18" ry="46" transform="rotate(320)" />
+                  <ellipse cx="0" cy="-38" rx="18" ry="46" transform="rotate(340)" />
+                </g>
+              </g>
+              <circle cx="0" cy="0" r="20" fill="url(#center)"/>
+            </g>
+
+            <g class="flower" transform="translate(300,250)">
+              <g fill="url(#petal)">
+                <!-- 18 pétalos para cerrar el círculo completamente -->
+                <ellipse cx="0" cy="-46" rx="22" ry="58" transform="rotate(0)" />
+                <ellipse cx="0" cy="-46" rx="22" ry="58" transform="rotate(20)" />
+                <ellipse cx="0" cy="-46" rx="22" ry="58" transform="rotate(40)" />
+                <ellipse cx="0" cy="-46" rx="22" ry="58" transform="rotate(60)" />
+                <ellipse cx="0" cy="-46" rx="22" ry="58" transform="rotate(80)" />
+                <ellipse cx="0" cy="-46" rx="22" ry="58" transform="rotate(100)" />
+                <ellipse cx="0" cy="-46" rx="22" ry="58" transform="rotate(120)" />
+                <ellipse cx="0" cy="-46" rx="22" ry="58" transform="rotate(140)" />
+                <ellipse cx="0" cy="-46" rx="22" ry="58" transform="rotate(160)" />
+                <ellipse cx="0" cy="-46" rx="22" ry="58" transform="rotate(180)" />
+                <ellipse cx="0" cy="-46" rx="22" ry="58" transform="rotate(200)" />
+                <ellipse cx="0" cy="-46" rx="22" ry="58" transform="rotate(220)" />
+                <ellipse cx="0" cy="-46" rx="22" ry="58" transform="rotate(240)" />
+                <ellipse cx="0" cy="-46" rx="22" ry="58" transform="rotate(260)" />
+                <ellipse cx="0" cy="-46" rx="22" ry="58" transform="rotate(280)" />
+                <ellipse cx="0" cy="-46" rx="22" ry="58" transform="rotate(300)" />
+                <ellipse cx="0" cy="-46" rx="22" ry="58" transform="rotate(320)" />
+                <ellipse cx="0" cy="-46" rx="22" ry="58" transform="rotate(340)" />
+              </g>
+              <circle cx="0" cy="0" r="24" fill="url(#center)"/>
+            </g>
+
+            <g class="flower" transform="translate(420,300) rotate(8)">
+              <g fill="url(#petal)">
+                <!-- cerrar círculo -->
+                <ellipse cx="0" cy="-38" rx="18" ry="46" transform="rotate(0)" />
+                <ellipse cx="0" cy="-38" rx="18" ry="46" transform="rotate(20)" />
+                <ellipse cx="0" cy="-38" rx="18" ry="46" transform="rotate(40)" />
+                <ellipse cx="0" cy="-38" rx="18" ry="46" transform="rotate(60)" />
+                <ellipse cx="0" cy="-38" rx="18" ry="46" transform="rotate(80)" />
+                <ellipse cx="0" cy="-38" rx="18" ry="46" transform="rotate(100)" />
+                <ellipse cx="0" cy="-38" rx="18" ry="46" transform="rotate(120)" />
+                <ellipse cx="0" cy="-38" rx="18" ry="46" transform="rotate(140)" />
+                <ellipse cx="0" cy="-38" rx="18" ry="46" transform="rotate(160)" />
+                <ellipse cx="0" cy="-38" rx="18" ry="46" transform="rotate(180)" />
+                <ellipse cx="0" cy="-32" rx="15" ry="40" transform="rotate(200)" />
+                <ellipse cx="0" cy="-32" rx="15" ry="40" transform="rotate(220)" />
+                <ellipse cx="0" cy="-32" rx="15" ry="40" transform="rotate(240)" />
+                <ellipse cx="0" cy="-32" rx="15" ry="40" transform="rotate(260)" />
+                <ellipse cx="0" cy="-32" rx="15" ry="40" transform="rotate(280)" />
+                <ellipse cx="0" cy="-32" rx="15" ry="40" transform="rotate(300)" />
+                <ellipse cx="0" cy="-32" rx="15" ry="40" transform="rotate(320)" />
+                <ellipse cx="0" cy="-32" rx="15" ry="40" transform="rotate(340)" />
+              </g>
+              <circle cx="0" cy="0" r="16" fill="url(#center)"/>
+            </g>
+          </g>
+        </svg>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Footer tiny note -->
+<footer class="mt-8 text-center text-[11px] text-sky-200/60">
+    Hecho con cariño en modo HUD. Para Esperanza.
+</footer>
+
+<script>
+// Letras a desbloquear
+const letras = ['H', 'P', 'U', 'S'];
+let letrasRestantes = [...letras];
+let letrasDesbloqueadas = [];
+let misionesResueltas = { m1: false, m2: false, m3: false, castigo: false };
+const palabraSecreta = 'hopyus';
+
+// Preguntas de castigo
+const castigos = [
+  {
+    pregunta: '¿Cuál es la propiedad CSS para hacer que un elemento sea invisible pero conserve su espacio?',
+    opciones: [
+      { txt: 'display: none;', correcto: false },
+      { txt: 'visibility: hidden;', correcto: true },
+      { txt: 'opacity: 0;', correcto: false },
+      { txt: 'z-index: -1;', correcto: false }
+    ]
+  },
+  {
+    pregunta: '¿Qué etiqueta HTML se usa para resaltar código en línea?',
+    opciones: [
+      { txt: '<pre>', correcto: false },
+      { txt: '<code>', correcto: true },
+      { txt: '<kbd>', correcto: false },
+      { txt: '<samp>', correcto: false }
+    ]
+  },
+  {
+    pregunta: '¿Cuál método de array en JS retorna el primer elemento que cumple la condición?',
+    opciones: [
+      { txt: 'filter()', correcto: false },
+      { txt: 'find()', correcto: true },
+      { txt: 'map()', correcto: false },
+      { txt: 'forEach()', correcto: false }
+    ]
+  }
+];
+let castigoActual = 0;
+
+// Mostrar letras desbloqueadas
+function mostrarLetras() {
+  const liveHint = document.getElementById('liveHint');
+  liveHint.textContent = 'Letras desbloqueadas: ' + (letrasDesbloqueadas.join(' ') || 'Ninguna');
+}
+
+// Desbloquea una letra al azar
+function desbloquearLetra() {
+  if (letrasRestantes.length === 0) return;
+  const idx = Math.floor(Math.random() * letrasRestantes.length);
+  const letra = letrasRestantes.splice(idx, 1)[0];
+  letrasDesbloqueadas.push(letra);
+  mostrarLetras();
+  return letra;
+}
+
+// Utilidad para mostrar mensajes de feedback en cada misión
+function mostrarFeedback(misionBox, texto, color) {
+  // Elimina feedback anterior
+  let existente = misionBox.querySelector('.mission-feedback');
+  if (existente) existente.remove();
+  // Crea y muestra
+  const div = document.createElement('div');
+  div.className = 'mission-feedback mt-3 inline-flex items-center gap-2 text-xs px-2 py-1 rounded';
+  div.textContent = texto;
+  if (color === 'verde') {
+    div.style.color = '#39FF14';
+    div.style.background = 'rgba(52,211,153,0.08)';
+    div.style.border = '1px solid #39FF14';
+  } else if (color === 'rojo') {
+    div.style.color = '#F87171';
+    div.style.background = 'rgba(248,113,113,0.08)';
+    div.style.border = '1px solid #F87171';
+  }
+  misionBox.appendChild(div);
+}
+
+// Misiones principales
+['m1','m2','m3'].forEach(m => {
+  const opts = Array.from(document.querySelectorAll(`[data-mission="${m}"]`));
+  const misionBox = opts.length ? opts[0].closest('.mission-box') : null;
+  opts.forEach(btn => {
+    btn.addEventListener('click', function() {
+      if (misionesResueltas[m]) return;
+      const correcto = btn.hasAttribute('data-correct');
+      opts.forEach(b => b.disabled = true);
+      // Elimina feedback anterior
+      if (misionBox) {
+        let fb = misionBox.querySelector('.mission-feedback');
+        if (fb) fb.remove();
+      }
+      if (correcto) {
+        btn.classList.add('correct');
+        if (misionBox) mostrarFeedback(misionBox, 'Letra desbloqueada', 'verde');
+        desbloquearLetra();
+        misionesResueltas[m] = true;
+      } else {
+        btn.classList.add('incorrect');
+        if (misionBox) mostrarFeedback(misionBox, 'Respuesta incorrecta', 'rojo');
+        mostrarCastigo();
+      }
+      actualizarProgreso();
+    });
+  });
+});
+
+// Mostrar misión de castigo
+function mostrarCastigo() {
+  const castigoDiv = document.getElementById('castigo');
+  const pregunta = castigos[castigoActual % castigos.length];
+  document.getElementById('castigo-pregunta').textContent = pregunta.pregunta;
+  const opts = document.getElementById('opts-castigo');
+  opts.innerHTML = '';
+  // Elimina feedback anterior
+  let fb = castigoDiv.querySelector('.mission-feedback');
+  if (fb) fb.remove();
+  pregunta.opciones.forEach((op, i) => {
+    const b = document.createElement('button');
+    b.className = 'mission-option';
+    b.textContent = op.txt;
+    b.onclick = function() {
+      if (misionesResueltas.castigo) return;
+      opts.querySelectorAll('button').forEach(btn => btn.disabled = true);
+      // Elimina feedback anterior
+      let fb = castigoDiv.querySelector('.mission-feedback');
+      if (fb) fb.remove();
+      if (op.correcto) {
+        b.classList.add('correct');
+        mostrarFeedback(castigoDiv, 'Letra desbloqueada', 'verde');
+        desbloquearLetra();
+        misionesResueltas.castigo = true;
+      } else {
+        b.classList.add('incorrect');
+        mostrarFeedback(castigoDiv, 'Respuesta incorrecta', 'rojo');
+      }
+      actualizarProgreso();
+    };
+    opts.appendChild(b);
+  });
+  castigoDiv.classList.remove('hidden');
+  castigoActual++;
+}
+
+// Botón "Dame una pista"
+document.getElementById('hintBtn').addEventListener('click', function() {
+  const hints = [
+    'La palabra secreta tiene 6 letras.',
+    'Las letras desbloqueadas son importantes.',
+    'Busca letras resaltadas con el escáner.',
+    'No olvides probar combinaciones con las letras HPUS.'
+  ];
+  const panel = document.getElementById('hintsPanel');
+  const idx = panel.children.length % hints.length;
+  const div = document.createElement('div');
+  div.className = 'hint-item';
+  div.textContent = hints[idx];
+  panel.appendChild(div);
+});
+
+// Botón "Activar escáner"
+document.getElementById('scanBtn').addEventListener('click', function() {
+  document.querySelectorAll('.scan-target').forEach(el => {
+    if (el.textContent.trim().toUpperCase() === 'O' || el.textContent.trim().toUpperCase() === 'Y') {
+      el.classList.add('scan-highlight');
+    }
+  });
+  setTimeout(() => {
+    document.querySelectorAll('.scan-target').forEach(el => {
+      el.classList.remove('scan-highlight');
+    });
+  }, 2000);
+});
+
+// Progreso y desbloqueo de premio
+const answerInput = document.getElementById('answer');
+const ringProgress = document.getElementById('ringProgress');
+const ringText = document.getElementById('ringText');
+const unlockBtn = document.getElementById('unlockBtn');
+const lockedOverlay = document.getElementById('lockedOverlay');
+const bouquetWrap = document.getElementById('bouquetWrap');
+const feedback = document.getElementById('feedback');
+
+function actualizarProgreso() {
+  const valor = answerInput.value.trim().toLowerCase();
+  let correctas = 0;
+  for (let i = 0; i < palabraSecreta.length && i < valor.length; i++) {
+    if (valor[i] === palabraSecreta[i]) correctas++;
+    else break; // Solo cuenta las correctas en orden desde el inicio
+  }
+  const porcentaje = Math.round((correctas / palabraSecreta.length) * 100);
+  // Actualiza anillo
+  const dashoffset = 326.7 - (326.7 * porcentaje / 100);
+  ringProgress.style.strokeDashoffset = dashoffset;
+  ringText.textContent = porcentaje + '%';
+  // Cambia color del botón si está al 100%
+  if (porcentaje === 100) {
+    unlockBtn.style.background = '#39FF14';
+    unlockBtn.style.color = '#222';
+    unlockBtn.style.borderColor = '#39FF14';
+  } else {
+    unlockBtn.style.background = '';
+    unlockBtn.style.color = '';
+    unlockBtn.style.borderColor = '';
+  }
+  return porcentaje;
+}
+
+answerInput.addEventListener('input', actualizarProgreso);
+
+// Botón desbloquear
+document.getElementById('form').addEventListener('submit', function(e) {
+  e.preventDefault();
+  const valor = answerInput.value.trim().toLowerCase();
+  if (valor === palabraSecreta) {
+    // Desbloquea premio
+    lockedOverlay.style.display = 'none';
+    bouquetWrap.classList.remove('bouquet-hidden');
+    mostrarBotonesPremio(); // <-- Agrega los botones y funcionalidad
+    feedback.textContent = '¡Felicidades! Has desbloqueado el ramo de flores amarillas.';
+    feedback.style.color = '#39FF14';
+    unlockBtn.style.background = '#39FF14';
+    unlockBtn.style.color = '#222';
+    unlockBtn.style.borderColor = '#39FF14';
+  } else {
+    feedback.textContent = 'Palabra incorrecta. Sigue intentando.';
+    feedback.style.color = '#F87171';
+  }
+});
+
+// Función para crear los botones y sus eventos
+function mostrarBotonesPremio() {
+  const prizeActions = document.getElementById('prizeActions');
+  prizeActions.innerHTML = ''; // Limpia por si acaso
+
+  // Botón Agitar ramo
+  const shakeBtn = document.createElement('button');
+  shakeBtn.id = 'shakeBtn';
+  shakeBtn.className = 'px-4 py-2 text-xs rounded-lg bg-amber-400/10 text-amber-200 border border-amber-300/40 hover:bg-amber-400/20 transition btn-glow';
+  shakeBtn.textContent = 'Agitar ramo';
+  shakeBtn.onclick = function() {
+    const bouquet = document.getElementById('bouquet');
+    bouquet.classList.remove('sway');
+    // Reinicia animación
+    void bouquet.offsetWidth;
+    bouquet.classList.add('sway');
+  };
+
+  // Botón Hacer caer pétalos
+  const bloomBtn = document.createElement('button');
+  bloomBtn.id = 'bloomBtn';
+  bloomBtn.className = 'px-4 py-2 text-xs rounded-lg bg-yellow-400/10 text-yellow-200 border border-yellow-300/40 hover:bg-yellow-400/20 transition btn-glow';
+  bloomBtn.textContent = 'Hacer caer pétalos';
+  bloomBtn.onclick = function() {
+    lanzarPetalos();
+  };
+
+  prizeActions.appendChild(shakeBtn);
+  prizeActions.appendChild(bloomBtn);
+  prizeActions.classList.remove('opacity-0','pointer-events-none');
+}
+
+// Función para animar pétalos cayendo
+function lanzarPetalos() {
+  const bouquetSection = document.querySelector('.relative');
+  for (let i = 0; i < 18; i++) {
+    const petal = document.createElement('div');
+    petal.className = 'petal';
+    petal.style.left = (40 + Math.random() * 40) + '%';
+    petal.style.top = '30%';
+    petal.style.opacity = 1;
+    petal.style.setProperty('--tx', `${-100 + Math.random()*200}px`);
+    petal.style.setProperty('--ty', `${250 + Math.random()*100}px`);
+    petal.style.animation = `fall ${2 + Math.random()*1.5}s linear forwards`;
+    bouquetSection.appendChild(petal);
+    setTimeout(() => petal.remove(), 3500);
+  }
+}
+mostrarLetras();
+actualizarProgreso();
+</script>
+</body>
+</html>

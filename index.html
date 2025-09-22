@@ -230,6 +230,8 @@
             font-size: 0.85rem;
         }
         
+        /* .petal ya no se usa, ahora los pétalos son imágenes */
+        /*
         .petal {
             position: absolute;
             width: 12px;
@@ -239,7 +241,6 @@
             opacity: 0;
             pointer-events: none;
         }
-        
         @keyframes fall {
             0% {
                 opacity: 1;
@@ -250,6 +251,7 @@
                 transform: translate(var(--tx), var(--ty)) rotate(360deg);
             }
         }
+        */
         
         #scanBtn {
           background: #2563eb !important; /* azul */
@@ -260,6 +262,15 @@
           background: #a21caf !important; /* morado */
           color: #fff !important;
           border-color: #a21caf !important;
+        }
+        
+        .sway-intense {
+            animation: sway-intense var(--sway-speed, 1s) infinite alternate cubic-bezier(.68,-0.55,.27,1.55);
+            transform-origin: center bottom;
+        }
+        @keyframes sway-intense {
+            0% { transform: rotate(-25deg); }
+            100% { transform: rotate(25deg); }
         }
     </style>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -437,140 +448,7 @@
 
       <!-- Bouquet -->
       <div id="bouquetWrap" class="absolute inset-0 flex items-end justify-center bouquet-wrap bouquet-hidden">
-        <svg id="bouquet" class="sway" width="100%" height="100%" viewBox="0 0 600 600" role="img" aria-label="Ramo de flores amarillas" preserveAspectRatio="xMidYMid meet">
-          <defs>
-            <radialGradient id="petal" cx="30%" cy="30%">
-              <stop offset="0%" stop-color="#FFF4B0"/>
-              <stop offset="55%" stop-color="#FFD84D"/>
-              <stop offset="100%" stop-color="#FFB300"/>
-            </radialGradient>
-            <radialGradient id="center" cx="40%" cy="40%">
-              <stop offset="0%" stop-color="#FFECB3"/>
-              <stop offset="50%" stop-color="#E08A00"/>
-              <stop offset="100%" stop-color="#8A4B00"/>
-            </radialGradient>
-            <linearGradient id="stem" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stop-color="#39C172"/>
-              <stop offset="100%" stop-color="#1E8A4A"/>
-            </linearGradient>
-            <linearGradient id="wrap" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stop-color="#254056"/>
-              <stop offset="100%" stop-color="#1B2E3D"/>
-            </linearGradient>
-            <filter id="bloomGlow">
-              <feGaussianBlur stdDeviation="2" result="b"/>
-              <feMerge>
-                <feMergeNode in="b"/>
-                <feMergeNode in="SourceGraphic"/>
-              </feMerge>
-            </filter>
-          </defs>
-
-          <!-- Wrapper paper -->
-          <g transform="translate(300,520)">
-            <path d="M -90 10 C -140 -40, -120 -140, -20 -160 C 10 -165, 30 -165, 60 -160 C 160 -140, 180 -40, 130 10 C 60 60, -20 60, -90 10 Z"
-                  fill="url(#wrap)" stroke="rgba(94,200,255,.25)" stroke-width="1"/>
-            <path d="M -60 25 C -100 0, -70 -60, -20 -70 C 30 -80, 80 -60, 100 0 C 65 35, 10 45, -60 25 Z"
-                  fill="rgba(255,255,255,.05)"/>
-          </g>
-
-          <!-- Stems -->
-          <g id="stems" transform="translate(300,520)" stroke="url(#stem)" stroke-width="6" stroke-linecap="round" fill="none">
-            <path d="M 0 0 C -10 -60, -40 -160, -80 -240" />
-            <path d="M 0 0 C 0 -80, 0 -190, 0 -270" />
-            <path d="M 0 0 C 10 -70, 40 -170, 85 -240" />
-            <path d="M 0 0 C -5 -70, -10 -180, -20 -260" />
-            <path d="M 0 0 C 8 -60, 25 -140, 45 -210" />
-          </g>
-
-          <!-- Leaves -->
-          <g id="leaves" transform="translate(300,520)" fill="#2DA864" opacity=".9">
-            <path d="M -15 -40 C -80 -60, -70 -90, -30 -95 C 10 -95, 20 -70, -15 -40 Z" />
-            <path d="M 18 -42 C 70 -65, 75 -100, 30 -104 C -10 -106, -15 -80, 18 -42 Z" />
-          </g>
-
-          <!-- Flowers -->
-          <g id="flowers" filter="url(#bloomGlow)">
-            <!-- Helper for drawing a flower -->
-            <!-- We'll place several flowers with slight variations -->
-            <g class="flower" transform="translate(180,300) rotate(-10)">
-              <g class="petals">
-                <!-- pétalos rodeando por completo -->
-                <g fill="url(#petal)">
-                  <ellipse cx="0" cy="-38" rx="18" ry="46" transform="rotate(0)" />
-                  <ellipse cx="0" cy="-38" rx="18" ry="46" transform="rotate(20)" />
-                  <ellipse cx="0" cy="-38" rx="18" ry="46" transform="rotate(40)" />
-                  <ellipse cx="0" cy="-38" rx="18" ry="46" transform="rotate(60)" />
-                  <ellipse cx="0" cy="-38" rx="18" ry="46" transform="rotate(80)" />
-                  <ellipse cx="0" cy="-38" rx="18" ry="46" transform="rotate(100)" />
-                  <ellipse cx="0" cy="-38" rx="18" ry="46" transform="rotate(120)" />
-                  <ellipse cx="0" cy="-38" rx="18" ry="46" transform="rotate(140)" />
-                  <ellipse cx="0" cy="-38" rx="18" ry="46" transform="rotate(160)" />
-                  <ellipse cx="0" cy="-38" rx="18" ry="46" transform="rotate(180)" />
-                  <ellipse cx="0" cy="-38" rx="18" ry="46" transform="rotate(200)" />
-                  <ellipse cx="0" cy="-38" rx="18" ry="46" transform="rotate(220)" />
-                  <ellipse cx="0" cy="-38" rx="18" ry="46" transform="rotate(240)" />
-                  <ellipse cx="0" cy="-38" rx="18" ry="46" transform="rotate(260)" />
-                  <ellipse cx="0" cy="-38" rx="18" ry="46" transform="rotate(280)" />
-                  <ellipse cx="0" cy="-38" rx="18" ry="46" transform="rotate(300)" />
-                  <ellipse cx="0" cy="-38" rx="18" ry="46" transform="rotate(320)" />
-                  <ellipse cx="0" cy="-38" rx="18" ry="46" transform="rotate(340)" />
-                </g>
-              </g>
-              <circle cx="0" cy="0" r="20" fill="url(#center)"/>
-            </g>
-
-            <g class="flower" transform="translate(300,250)">
-              <g fill="url(#petal)">
-                <!-- 18 pétalos para cerrar el círculo completamente -->
-                <ellipse cx="0" cy="-46" rx="22" ry="58" transform="rotate(0)" />
-                <ellipse cx="0" cy="-46" rx="22" ry="58" transform="rotate(20)" />
-                <ellipse cx="0" cy="-46" rx="22" ry="58" transform="rotate(40)" />
-                <ellipse cx="0" cy="-46" rx="22" ry="58" transform="rotate(60)" />
-                <ellipse cx="0" cy="-46" rx="22" ry="58" transform="rotate(80)" />
-                <ellipse cx="0" cy="-46" rx="22" ry="58" transform="rotate(100)" />
-                <ellipse cx="0" cy="-46" rx="22" ry="58" transform="rotate(120)" />
-                <ellipse cx="0" cy="-46" rx="22" ry="58" transform="rotate(140)" />
-                <ellipse cx="0" cy="-46" rx="22" ry="58" transform="rotate(160)" />
-                <ellipse cx="0" cy="-46" rx="22" ry="58" transform="rotate(180)" />
-                <ellipse cx="0" cy="-46" rx="22" ry="58" transform="rotate(200)" />
-                <ellipse cx="0" cy="-46" rx="22" ry="58" transform="rotate(220)" />
-                <ellipse cx="0" cy="-46" rx="22" ry="58" transform="rotate(240)" />
-                <ellipse cx="0" cy="-46" rx="22" ry="58" transform="rotate(260)" />
-                <ellipse cx="0" cy="-46" rx="22" ry="58" transform="rotate(280)" />
-                <ellipse cx="0" cy="-46" rx="22" ry="58" transform="rotate(300)" />
-                <ellipse cx="0" cy="-46" rx="22" ry="58" transform="rotate(320)" />
-                <ellipse cx="0" cy="-46" rx="22" ry="58" transform="rotate(340)" />
-              </g>
-              <circle cx="0" cy="0" r="24" fill="url(#center)"/>
-            </g>
-
-            <g class="flower" transform="translate(420,300) rotate(8)">
-              <g fill="url(#petal)">
-                <!-- cerrar círculo -->
-                <ellipse cx="0" cy="-38" rx="18" ry="46" transform="rotate(0)" />
-                <ellipse cx="0" cy="-38" rx="18" ry="46" transform="rotate(20)" />
-                <ellipse cx="0" cy="-38" rx="18" ry="46" transform="rotate(40)" />
-                <ellipse cx="0" cy="-38" rx="18" ry="46" transform="rotate(60)" />
-                <ellipse cx="0" cy="-38" rx="18" ry="46" transform="rotate(80)" />
-                <ellipse cx="0" cy="-38" rx="18" ry="46" transform="rotate(100)" />
-                <ellipse cx="0" cy="-38" rx="18" ry="46" transform="rotate(120)" />
-                <ellipse cx="0" cy="-38" rx="18" ry="46" transform="rotate(140)" />
-                <ellipse cx="0" cy="-38" rx="18" ry="46" transform="rotate(160)" />
-                <ellipse cx="0" cy="-38" rx="18" ry="46" transform="rotate(180)" />
-                <ellipse cx="0" cy="-32" rx="15" ry="40" transform="rotate(200)" />
-                <ellipse cx="0" cy="-32" rx="15" ry="40" transform="rotate(220)" />
-                <ellipse cx="0" cy="-32" rx="15" ry="40" transform="rotate(240)" />
-                <ellipse cx="0" cy="-32" rx="15" ry="40" transform="rotate(260)" />
-                <ellipse cx="0" cy="-32" rx="15" ry="40" transform="rotate(280)" />
-                <ellipse cx="0" cy="-32" rx="15" ry="40" transform="rotate(300)" />
-                <ellipse cx="0" cy="-32" rx="15" ry="40" transform="rotate(320)" />
-                <ellipse cx="0" cy="-32" rx="15" ry="40" transform="rotate(340)" />
-              </g>
-              <circle cx="0" cy="0" r="16" fill="url(#center)"/>
-            </g>
-          </g>
-        </svg>
+        <img id="bouquet" src="ramo.png" alt="Ramo de flores amarillas" style="max-height: 100%; max-width: 100%; display: block; margin: 0 auto;" />
       </div>
     </div>
   </div>
@@ -810,7 +688,13 @@ document.getElementById('form').addEventListener('submit', function(e) {
   }
 });
 
-// Función para crear los botones y sus eventos
+// Variable global para la velocidad de agitación
+let swaySpeed = 1.2; // Reinicia velocidad al mostrar el ramo
+const bouquet = document.getElementById('bouquet');
+//bouquet.classList.remove('sway-intense'); // <-- COMENTAR O ELIMINAR
+//bouquet.style.setProperty('--sway-speed', swaySpeed + 's'); // <-- COMENTAR O ELIMINAR
+//bouquet.classList.add('sway-intense'); // <-- COMENTAR O ELIMINAR
+
 function mostrarBotonesPremio() {
   const prizeActions = document.getElementById('prizeActions');
   prizeActions.innerHTML = ''; // Limpia por si acaso
@@ -822,10 +706,12 @@ function mostrarBotonesPremio() {
   shakeBtn.textContent = 'Agitar ramo';
   shakeBtn.onclick = function() {
     const bouquet = document.getElementById('bouquet');
-    bouquet.classList.remove('sway');
+    swaySpeed = Math.max(0.25, swaySpeed * 0.8); // Cada click aumenta la velocidad (reduce duración), mínimo 0.25s
+    bouquet.classList.remove('sway', 'sway-intense');
     // Reinicia animación
     void bouquet.offsetWidth;
-    bouquet.classList.add('sway');
+    bouquet.style.setProperty('--sway-speed', swaySpeed + 's');
+    bouquet.classList.add('sway-intense');
   };
 
   // Botón Hacer caer pétalos
@@ -844,20 +730,62 @@ function mostrarBotonesPremio() {
 
 // Función para animar pétalos cayendo
 function lanzarPetalos() {
-  const bouquetSection = document.querySelector('.relative');
-  for (let i = 0; i < 18; i++) {
-    const petal = document.createElement('div');
-    petal.className = 'petal';
-    petal.style.left = (40 + Math.random() * 40) + '%';
-    petal.style.top = '30%';
-    petal.style.opacity = 1;
-    petal.style.setProperty('--tx', `${-100 + Math.random()*200}px`);
-    petal.style.setProperty('--ty', `${250 + Math.random()*100}px`);
-    petal.style.animation = `fall ${2 + Math.random()*1.5}s linear forwards`;
-    bouquetSection.appendChild(petal);
-    setTimeout(() => petal.remove(), 3500);
+  // Elimina pétalos anteriores si aún quedan
+  document.querySelectorAll('.petal-img').forEach(p => p.remove());
+
+  // Crea muchos pétalos (por ejemplo, 50)
+  const cantidad = 50;
+  const body = document.body;
+  const anchoVentana = window.innerWidth;
+  const altoVentana = window.innerHeight;
+
+  for (let i = 0; i < cantidad; i++) {
+    const petal = document.createElement('img');
+    petal.src = 'petalo.png';
+    petal.className = 'petal-img';
+    petal.style.position = 'fixed';
+    petal.style.zIndex = 9999;
+    petal.style.width = (40 + Math.random() * 40) + 'px'; // Más grandes
+    petal.style.height = 'auto';
+    petal.style.left = (Math.random() * (anchoVentana - 60)) + 'px';
+    petal.style.top = '-60px';
+    petal.style.opacity = 0.85 + Math.random() * 0.15;
+    petal.style.pointerEvents = 'none';
+    petal.style.transition = 'transform 0.2s';
+
+    // Animación personalizada
+    const duracion = 2.5 + Math.random() * 2.5; // 2.5s a 5s
+    const desplazamientoX = (-100 + Math.random() * 200); // movimiento horizontal
+    const rotacion = (Math.random() * 360);
+
+    petal.animate([
+      { 
+        transform: `translateY(0px) translateX(0px) rotate(0deg)`, 
+        opacity: petal.style.opacity 
+      },
+      { 
+        transform: `translateY(${altoVentana + 100}px) translateX(${desplazamientoX}px) rotate(${rotacion}deg)`, 
+        opacity: 0.7 
+      }
+    ], {
+      duration: duracion * 1000,
+      easing: 'ease-in',
+      fill: 'forwards'
+    });
+
+    // Elimina el pétalo al terminar la animación
+    setTimeout(() => petal.remove(), duracion * 1000 + 500);
+
+    body.appendChild(petal);
   }
 }
+
+// Detener el movimiento del ramo al hacer clic en la imagen
+document.getElementById('bouquet').addEventListener('click', function() {
+  this.classList.remove('sway-intense');
+});
+
+// Mostrar letras desbloqueadas
 mostrarLetras();
 actualizarProgreso();
 </script>
